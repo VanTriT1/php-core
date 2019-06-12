@@ -1,4 +1,58 @@
-<?php require('../config/connectdb.php'); ?>
+<?php require("../config/connectdb.php");
+    if ($_SERVER["REQUEST_METHOD"] == "GET" && !empty($_GET['id'])) {
+        $sqlUser = "SELECT id, username, email FROM user WHERE id = {$_GET['id']}";
+        $result = $conn->query($sqlUser);
+        $user = mysqli_fetch_assoc($result);
+    }
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        $usernameErr = $emailErr = "";
+        $username = $email = "";
+        if ($_SERVER["REQUEST_METHOD"] == "POST") {
+            if (empty($_POST["username"])) {
+                $usernameErr = "Username is required";
+            } else {
+                $username = test_input($_POST["username"]);
+                if (!preg_match("/^[A-Za-z0-9_\.]{6,32}$/",$username)) {
+                    $usernameErr = "Only letters and white space allowed";
+                }
+            }
+            
+            if (empty($_POST["email"])) {
+                $emailErr = "Email is required";
+            } else {
+                $email = test_input($_POST["email"]);
+                if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    $emailErr = "Invalid email format"; 
+                }
+            }
+        }
+    }
+        
+    function test_input($data)
+    {
+        $data = trim($data);
+        $data = stripslashes($data);
+        $data = htmlspecialchars($data);
+        return $data;
+    }
+
+    if(!empty($_POST['username']) && !empty($_POST['email'])) {
+        $sqlCheckUsername = "SELECT * FROM user WHERE username = '.$username.' OR email = '.$email.'";
+        $result = $conn->query($sqlCheckUsername);
+        $row = mysqli_fetch_assoc($result);
+        if($row == NULL) {
+            $sql = "UPDATE user SET username = '{$username}', email = '{$email}' WHERE id = {$_POST['id']}";
+            if ($conn->query($sql) === TRUE) {
+                header("Location: index.php");
+            } else {
+                header("Location: edit.php?message=error");
+            }
+        } else {
+            header("Location: edit.php?message=exist");
+        }
+    }
+    $conn->close();
+?>
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -8,16 +62,9 @@
         <meta name="author" content="">
         <title>User</title>
         <link href="../assets/css/bootstrap.css" rel="stylesheet">
-            <script src="../assets/js/jquery-1.10.2.js"></script>
+        <script src="https://code.jquery.com/ui/1.10.2/jquery-ui.min.js"></script>
         <link href="../assets/css/sb-admin.css" rel="stylesheet">
         <link rel="stylesheet" href="../assets/font-awesome/css/font-awesome.min.css">
-        <style>
-            label.error {
-            display: block-inline;
-            color: red;
-            font-size: 16px;
-            }
-        </style>
     </head>
     <body>
         <div id="wrapper">
@@ -29,7 +76,7 @@
                     <ul class="nav navbar-nav side-nav">
                         <li class="active"><a href="index.php"><i class="fa fa-dashboard"></i> Home</a></li>
                         <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> Users <b class="caret"></b></a>
+                            <a href="index.php" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> Users <b class="caret"></b></a>
                             <ul class="dropdown-menu">
                             <li><a href="add.php"><i class="fa fa-plus"></i> Add new</a></li>
                             <li><a href="index.php"><i class="fa fa-list"></i> List users</a></li>
@@ -48,11 +95,7 @@
                 <div class="panel-heading">
                     <h3 class="panel-title"><span style="color: red;font-weight: bold;">User info</span></h3>
                 </div>
-                <?php
-                    $sqlUser = "SELECT id, username, email FROM user WHERE id = {$_GET['id']}";
-                    $result = $conn->query($sqlUser);
-                    $user = mysqli_fetch_assoc($result);
-                ?>
+                
                 <div class="panel-body col-md-6">
                     <div class="student-form">
                         <form id="w0" action="edit.php" method="post">
@@ -76,60 +119,10 @@
                             </div>
 
                             <div class="form-group">
-                                <button type="submit" class="btn btn-danger">Edit</button>  
-                                <button type="reset" class="btn btn-success">Cancel</button>  
+                                <button type="submit" class="btn btn-danger">Edit</button>
+                                <button type="reset" class="btn btn-success">Cancel</button>
                             </div>
                         </form>
-                        <?php
-                            if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                                $usernameErr = $emailErr = "";
-                                $username = $email = "";
-                                if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                                    if (empty($_POST["username"])) {
-                                        $usernameErr = "Username is required";
-                                    } else {
-                                        $username = test_input($_POST["username"]);
-                                        if (!preg_match("/^[A-Za-z0-9_\.]{6,32}$/",$username)) {
-                                            $usernameErr = "Only letters and white space allowed"; 
-                                        }
-                                    }
-                                    
-                                    if (empty($_POST["email"])) {
-                                        $emailErr = "Email is required";
-                                    } else {
-                                        $email = test_input($_POST["email"]);
-                                        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                                            $emailErr = "Invalid email format"; 
-                                        }
-                                    }
-                                }
-                            }
-                                
-                            function test_input($data) {
-                                $data = trim($data);
-                                $data = stripslashes($data);
-                                $data = htmlspecialchars($data);
-                                return $data;
-                            }
-                            
-                            if(!empty($_POST['username']) && !empty($_POST['email'])) {
-                                $sqlCheckUsername = "SELECT * FROM `user` WHERE username = '{$username}' OR email = '{$email}'";
-                                $result = $conn->query($sqlCheckUsername);
-                                $row = mysqli_fetch_assoc($result);
-                                if($row === NULL) {
-                                    $sql = "UPDATE user SET username = '{$username}', email = '{$email}' WHERE id = {$_POST['id']}";
-                                    if ($conn->query($sql) === TRUE) {
-                                        // header('Location: index.php');
-                                        echo "<script>window.location='./index.php'</script>";
-                                    } else {
-                                        echo "<script>window.location='edit.php?message=error'</script>";
-                                    }
-                                } else {
-                                    echo "<script>window.location='edit.php?message=exist'</script>";
-                                }
-                            }
-                            $conn->close();
-                        ?>
                     </div>
                 </div>
             </div>

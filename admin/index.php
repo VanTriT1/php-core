@@ -1,4 +1,3 @@
-<?php require('../config/connectdb.php'); ?>
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -8,18 +7,11 @@
         <meta name="author" content="">
         <title>User</title>
         <link href="../assets/css/bootstrap.css" rel="stylesheet">
-            <script src="../assets/js/jquery-1.10.2.js"></script>
+        <script src="../assets/js/jquery-1.10.2.js"></script>
         <link href="../assets/css/sb-admin.css" rel="stylesheet">
         <link rel="stylesheet" href="../assets/font-awesome/css/font-awesome.min.css">
-        <style>
-            label.error {
-            display: block-inline;
-            color: red;
-            font-size: 16px;
-            }
-        </style>
     </head>
-
+        
     <body>
         <div id="wrapper">
             <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -50,7 +42,7 @@
                     </div>
                     <div class="panel-body">
                         <p class="pull-right">
-                            <a class="btn btn-danger" href="add.php"><span class="fa fa-plus"></span>Add user</a>        
+                            <a class="btn btn-danger" href="add.php"><span class="fa fa-plus"></span>Add user</a>
                         </p>
                         <div id="w0" class="grid-view">
                             <table class="table table-striped table-bordered">
@@ -64,17 +56,17 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php
-                                        $sqlListUsers = "SELECT id, username, password, email FROM user";
-                                            $listUsers = $conn->query($sqlListUsers);
-                                            while($user = $listUsers->fetch_assoc()) {  
-                                    ?>
+                                <?php require("../config/connectdb.php"); 
+                                    $sqlListUsers = "SELECT id, username, password, email FROM user";
+                                    $listUsers = $conn->query($sqlListUsers);
+                                    while($user = $listUsers->fetch_assoc()) {
+                                ?>
                                     <tr class="success" data-key="1">
-                                        <td style="text-align:center"><?php echo $user['id']?></td>
-                                        <td style="text-align:center"><?php echo $user['username']?></td>
-                                        <td style="text-align:center"><?php echo $user['password']?></td>
-                                        <td style="text-align:center"><?php echo $user['email']?></td>
-                                        <td style="text-align:center"> <a class="btn btn-sm btn-success" href="edit.php?id=<?php echo $user['id'];?>">Edit</a> <a class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')" href="delete.php?id=<?php echo $user['id']; ?>">Delete</a></td>
+                                        <td style="text-align:center"><?php echo $user["id"]?></td>
+                                        <td style="text-align:center"><?php echo $user["username"]?></td>
+                                        <td style="text-align:center"><?php echo $user["password"]?></td>
+                                        <td style="text-align:center"><?php echo $user["email"]?></td>
+                                        <td style="text-align:center"> <a class="btn btn-sm btn-success" href="edit.php?id=<?php echo $user["id"];?>">Edit</a> <a class="btn btn-sm btn-danger" onclick="return confirm("Are you sure?"")" href="delete.php?id=<?php echo $user["id"]; ?>">Delete</a></td>
                                     </tr>
                                     <?php } ?>
                                 </tbody>
